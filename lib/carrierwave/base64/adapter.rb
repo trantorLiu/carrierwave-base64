@@ -16,11 +16,15 @@ module Carrierwave
       def mount_base64_uploaders(attribute, uploader_class, options = {})
         mount_uploaders attribute, uploader_class, options
 
-        define_method "#{attribute}=" do |data|
-          if data.present? && data.is_a?(Array) && data.all? { |d| d.is_a?(String) } && data.all? { |d| d.strip.start_with?("data") }
+        define_method "images=" do |data|
+          if data.present? && data.is_a?(Array)
             files = []
-            data.each do |d|
-              files << Carrierwave::Base64::Base64StringIO.new(d.strip)
+            data.map do |d|
+              if d.is_a?(String)&& d.strip.start_with?("data")
+                files << Carrierwave::Base64::Base64StringIO.new(d.strip)
+              else
+                files << d
+              end
             end
             super(files)
           else
